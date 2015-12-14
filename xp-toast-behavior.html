@@ -7,39 +7,41 @@ The complete set of contributors may be found at https://expandjs.github.io/CONT
 -->
 
 <!--
-This behavior is used to add toast capabilities on the context element.
+A behavior used to add toast capabilities on a custom element.
 
 @behavior xp-toast-behavior
-@description A behavior used to add toast capabilities on the context element
-@keywords web app, html5, expandjs, web-components
+@description A behavior used to add toast capabilities on a custom element
+@keywords expandjs, web app, custom elements, web-components
 @group behaviors
+
 @homepage http://expandjs.com/elements/xp-toast-behavior
 @repository https://github.com/ExpandJS/xp-toast-behavior
 
-@behavior xp-overlay-behavior /bower_components/xp-overlay-behavior/xp-overlay-behavior.html
-@behavior xp-shared-behavior /bower_components/xp-shared-behavior/xp-shared-behavior.html
+@behavior xp-overlay-behavior /bower_components/xp-overlay/xp-overlay-behavior.html
 
-@dependency polymer Polymer/polymer#^1.1.0
-@dependency expandjs ExpandJS/expandjs#0.9.11
-@dependency xp-overlay-behavior ExpandJS/xp-overlay-behavior#0.9.11
-@dependency xp-shared-behavior ExpandJS/xp-shared-behavior#0.9.11
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency expandjs ExpandJS/expandjs#0.10.0
+@dependency xp-overlay ExpandJS/xp-overlay#0.10.0
 -->
 
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../expandjs/expandjs.html">
-<link rel="import" href="../xp-overlay-behavior/xp-overlay-behavior.html">
-<link rel="import" href="../xp-shared-behavior/xp-shared-behavior.html">
-<link rel="import" href="xp-toast-styles.html">
+<link rel="import" href="../xp-overlay/xp-overlay-behavior.html">
 
 <script>
     Polymer.XPToastBehaviorImp = {
 
-        // LISTENERS
-        listeners: {
-            'shared-changed': '_sharedHandler'
-        },
+        /**
+         * Aligns the toast.
+         *
+         * @method align
+         * @returns {Element}
+         */
+        align: function () {
 
-        /*********************************************************************/
+            // Override
+            return this;
+        },
 
         /**
          * Hides the toast.
@@ -55,20 +57,20 @@ This behavior is used to add toast capabilities on the context element.
             // Checking
             if (!self.queue[0] || self !== self.queue[0].instance) { return self; }
 
-            // Exiting
-            self._exit();
+            // Setting
+            self.showed = false;
 
             // Shifting
             self.queue.shift();
 
             // Entering
-            if (self.queue.length) { self.queue[0].instance._enter(self.queue[0].target, self.queue[0].data); }
+            if (self.queue.length) { self.queue[0].instance._show(self.queue[0].target, self.queue[0].data); }
 
             return self;
         },
 
         /**
-         * Shows the toast.
+         * Adds the toast to the showing queue.
          *
          * @method show
          * @param {Element | string} [target]
@@ -83,24 +85,38 @@ This behavior is used to add toast capabilities on the context element.
             // Pushing
             self.queue.push({instance: self, target: target, data: data});
 
-            // Entering
-            if (self.queue.length === 1) { self.queue[0].instance._enter(self.queue[0].target, self.queue[0].data); }
+            // Showing
+            if (self.queue.length < 2) { self._show(target, data); }
 
             return self;
+        },
+
+        /**
+         * Toggles the toast.
+         *
+         * @method toggle
+         * @param {Element | string} [target]
+         * @param {*} [data]
+         * @returns {Element}
+         */
+        toggle: function (target, data) {
+
+            // Showing
+            return this.show(target, data);
         },
 
         /*********************************************************************/
 
         /**
-         * Enters the toast.
+         * Shows the toast.
          *
-         * @method _enter
+         * @method _show
          * @param {Element | string} [target]
          * @param {*} [data]
          * @returns {Element}
          * @private
          */
-        _enter: function (target, data) {
+        _show: function (target, data) {
 
             // Asserting
             XP.assertArgument(XP.isVoid(target) || XP.isElement(target) || XP.isString(target), 1, 'Element or string');
@@ -109,26 +125,13 @@ This behavior is used to add toast capabilities on the context element.
             var self = this;
 
             // Setting
+            self.data   = data || self.data;
             self.target = target || self.target;
-            self.data   = data || (self.findTarget() || self).data || self.data;
             self.showed = true;
 
-            // Debouncing
-            self._jobHide();
+            // Hiding
+            self.debounce('hide', self.hide.bind(self), self.timeout);
 
-            return self;
-        },
-
-        /**
-         * Exits the toast.
-         *
-         * @method _exit
-         * @returns {Element}
-         * @private
-         */
-        _exit: function () {
-            var self = this;
-            self.showed = false;
             return self;
         },
 
@@ -138,6 +141,18 @@ This behavior is used to add toast capabilities on the context element.
         properties: {
 
             /**
+             * If set to true, clicking outside will not close the overlay.
+             *
+             * @attribute auto-hide-disabled
+             * @type boolean
+             * @default true
+             */
+            autoHideDisabled: {
+                type: Boolean,
+                value: true
+            },
+
+            /**
              * The toast's label.
              *
              * @attribute label
@@ -145,24 +160,18 @@ This behavior is used to add toast capabilities on the context element.
              */
             label: {
                 reflectToAttribute: true,
-                type: String,
-                value: null
+                type: String
             },
 
             /**
-             * If set to true, the toast is visible.
+             * The toast's timeout.
              *
-             * @attribute showed
-             * @type boolean
-             * @readonly
-             * @notifies
+             * @attribute timeout
+             * @type number
              */
-            showed: {
-                notify: true,
-                readOnly: true,
-                reflectToAttribute: true,
-                type: Boolean,
-                value: false
+            timeout: {
+                type: Number,
+                value: 3000
             }
         },
 
@@ -180,19 +189,13 @@ This behavior is used to add toast capabilities on the context element.
 
         // LISTENER
         created: function () {
-            this._jobHide = XP.debounce(this.hide.bind(this), 3000);
-        },
 
-        /*********************************************************************/
-
-        // HANDLER
-        _sharedHandler: function () {
-            this._jobHide = XP.debounce(this.hide.bind(this), this.get('shared.material.toast.timeout') || 3000);
+            // Classifying
+            this.classList.add('toast');
         }
     };
 
     Polymer.XPToastBehavior = [
-        Polymer.XPSharedBehavior,
         Polymer.XPOverlayBehavior,
         Polymer.XPToastBehaviorImp
     ];

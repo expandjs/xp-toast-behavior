@@ -1,9 +1,9 @@
 {
   "name": "xp-toast-behavior",
   "license": "BSD-3-Clause",
-  "version": "0.9.11",
+  "version": "0.10.0",
   "main": "xp-toast-behavior.html",
-  "description": "A behavior used to add toast capabilities on the context element",
+  "description": "A behavior used to add toast capabilities on a custom element",
   "homepage": "http://expandjs.com/elements/xp-toast-behavior",
   "authors": [
     "Giuliano Rullo <g.rullo@expandjs.com>",
@@ -11,18 +11,17 @@
     "Robert Manolea <r.manolea@expandjs.com>"
   ],
   "keywords": [
-    "web app",
-    "html5",
     "expandjs",
+    "web app",
+    "custom elements",
     "web-components"
   ],
   "ignore": [
     "**/.*"
   ],
   "dependencies": {
-    "expandjs": "ExpandJS/expandjs#0.9.11",
-    "xp-overlay-behavior": "ExpandJS/xp-overlay-behavior#0.9.11",
-    "xp-shared-behavior": "ExpandJS/xp-shared-behavior#0.9.11",
-    "polymer": "Polymer/polymer#^1.1.0"
+    "expandjs": "ExpandJS/expandjs#0.10.0",
+    "xp-overlay": "ExpandJS/xp-overlay#0.10.0",
+    "polymer": "Polymer/polymer#^1.2.0"
   }
 }

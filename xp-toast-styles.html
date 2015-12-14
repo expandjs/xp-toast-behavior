@@ -7,45 +7,58 @@ The complete set of contributors may be found at https://expandjs.github.io/CONT
 -->
 
 <!--
-This stylesheet is used to stylize an toast element.
+This stylesheet is used to stylize a toast element.
 
 @stylesheet xp-toast-styles
-@description A stylesheet used to stylize an toast element
-@keywords web app, html5, expandjs, web-components
+@description A stylesheet used to stylize a toast element
+@keywords expandjs, web app, custom elements, web-components
 @group stylesheets
+
 @homepage http://expandjs.com/elements/xp-toast-styles
 @repository https://github.com/ExpandJS/xp-toast-behavior
 
-@dependency polymer Polymer/polymer#^1.1.0
+@dependency polymer Polymer/polymer#^1.2.0
+@dependency xp-overlay ExpandJS/xp-overlay#0.10.0
 -->
 
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../xp-overlay/xp-overlay-styles.html">
 
 <dom-module id="xp-toast-styles">
 
-    <template>
+    <template strip-whitespace>
+
+        <style include="xp-overlay-styles"></style>
 
         <style>
             :host {
-                display: block;
-                overflow: visible;
-                position: fixed;
-                text-align: left;
+                margin: 0;
                 -webkit-transition: -webkit-transform 0.5s, visibility 0.5s;
                 transition: transform 0.5s, visibility 0.5s;
-                visibility: hidden;
-                will-change: -webkit-transform, transform;
-                z-index: 9999;
             }
 
             :host([showed]) {
                 -webkit-transform: translate(0, 0);
                 transform: translate(0, 0);
-                visibility: visible;
             }
 
             :host(:not([showed])) {
-                pointer-events: none !important;
+                opacity: 1 !important;
+            }
+
+            :host .wrapper {
+                opacity: 1;
+                overflow: hidden;
+                text-overflow: ellipsis !important;
+                -webkit-transition: opacity 1s;
+                transition: opacity 1s;
+                white-space: nowrap !important;
+            }
+
+            :host([label=""]) .wrapper,
+            :host(:not([label])) .wrapper,
+            :host(:not([showed])) .wrapper {
+                opacity: 0 !important;
             }
         </style>
 
