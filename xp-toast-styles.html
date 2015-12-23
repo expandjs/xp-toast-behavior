@@ -47,9 +47,9 @@ This stylesheet is used to stylize a toast element.
             :host .wrapper {
                 opacity: 1;
                 overflow: hidden;
-                text-overflow: ellipsis !important;
+                text-overflow: ellipsis !important; /* override */
                 transition: opacity 1s;
-                white-space: nowrap !important;
+                white-space: nowrap !important; /* override */
             }
 
             :host([label=""]) .wrapper,
